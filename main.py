@@ -1,35 +1,30 @@
-import tkinter as tk
-from WaveSim import WaveSimulator
+import pygame, sys
+from constant import *
+from display import Display
 
-class App(tk.Tk):
+class Simulator:
     def __init__(self):
-        super().__init__()
-        self.geometry('1360x768')
-        self.title('Earthquake Simulator')
-        self.configure(bg='white')
-
-        self.center_window()
-        self.wave_simulator_page = WaveSimulator(self)
-
-        self.show_frame(self.wave_simulator_page)
-
-
-    def center_window(self):
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-
-        x = (screen_width // 2) - (1360 // 2)
-        y = (screen_height // 2) - (768 // 2)
-        self.geometry(f'1360x768+{x}+{y}')
+        pygame.init()
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption(GAME_NAME)
+        self.clock = pygame.time.Clock()
+        self.display = Display(self.screen)
     
-
-    def show_frame(self, frame):
-        for widget in self.winfo_children():  
-            widget.pack_forget()
-        frame.pack(fill='both', expand=True)        
+    def run(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                self.display.handle_event(event)
+            self.display.render()
+            pygame.display.update()
 
 
 if __name__ == "__main__":
-    app = App()
-    app.resizable(False,False)
-    app.mainloop()
+    simulator = Simulator()
+    simulator.run()

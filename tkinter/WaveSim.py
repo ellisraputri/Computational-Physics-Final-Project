@@ -6,6 +6,7 @@ class WaveSimulator(tk.Frame):
         self.master = parent
         self.ground_level = 489
         self.submitted = False
+        self.play = False
         self.create_widgets()
     
     def ground_click(self, event):
@@ -48,7 +49,7 @@ class WaveSimulator(tk.Frame):
                                 bd=0, highlightbackground='grey',highlightthickness=1)
         self.y_entry.place(x=160, y=144)
 
-        self.submit_button = tk.Button(self.right_panel, text="Submit", font=("Poppins", 12),
+        self.submit_button = tk.Button(self.right_panel, text="Save", font=("Poppins", 12),
                                        bd=0, command=self.toggle_submit)
         self.submit_button.place(x=253, y=144)
 
@@ -86,6 +87,39 @@ class WaveSimulator(tk.Frame):
 
             self.canvas.delete("marker")
 
+
+    def toggle_play(self):
+        if not self.play: 
+            self.play = True
+            self.submit_button.config(text="Cancel")
+
+            self.x_label_value = tk.Label(self.right_panel, text=self.x_entry.get(), font=("Poppins", 14), bg="white")
+            self.y_label_value = tk.Label(self.right_panel, text=self.y_entry.get(), font=("Poppins", 14), bg="white")
+
+            self.x_label_value.place(x=48, y=144)
+            self.y_label_value.place(x=160, y=144)
+
+            self.x_entry.place_forget()
+            self.y_entry.place_forget()
+
+            self.canvas.delete("marker")
+            x, y = int(self.x_label_value.cget("text")), int(self.y_label_value.cget("text"))
+            self.canvas.create_line(x - 8, y - 8, x + 8, y + 8, fill="red", width=4, tags="marker")
+            self.canvas.create_line(x + 8, y - 8, x - 8, y + 8, fill="red", width=4, tags="marker")
+
+        else:  
+            self.submitted = False
+            self.submit_button.config(text="Submit")
+
+            self.x_label_value.destroy()
+            self.y_label_value.destroy()
+            
+            self.x_entry.place(x=48, y=144)
+            self.y_entry.place(x=160, y=144)
+            self.x_entry.delete(0, tk.END)
+            self.y_entry.delete(0, tk.END)
+
+            self.canvas.delete("marker")
     
 
        

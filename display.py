@@ -25,20 +25,13 @@ class Display:
         
         self._draw_right_panel()
         self._render_wave_sim()
-        
-        if self.selected_x is not None and self.selected_y is not None:
-            if not self.submitted:
-                pygame.draw.circle(self.screen, GAME_COLOR['WHITE'], (self.selected_x, self.selected_y), 6)
-            else:
-                pygame.draw.line(self.screen, GAME_COLOR['RED'], (self.selected_x - 8, self.selected_y - 8), (self.selected_x + 8, self.selected_y + 8), 4)
-                pygame.draw.line(self.screen, GAME_COLOR['RED'], (self.selected_x + 8, self.selected_y - 8), (self.selected_x - 8, self.selected_y + 8), 4)
 
 
     def _draw_right_panel(self):
         font_title = pygame.font.Font(None, 32)
         font1 = pygame.font.Font(None, 24)
         
-        pygame.draw.rect(self.screen, GAME_COLOR['WHITE'], 
+        pygame.draw.rect(self.screen, GAME_COLOR['GRAY'], 
                          (RIGHT_PANEL_X, 0, RIGHT_PANEL_WIDTH, SCREEN_HEIGHT))
         title_text = font_title.render("User Input", True, GAME_COLOR['BLACK'])
         self.screen.blit(title_text, (RIGHT_PANEL_X + 20, 20))
@@ -61,25 +54,38 @@ class Display:
     def _render_wave_sim(self):
         for i in range(self.wave_sim.nx):
             for j in range(self.wave_sim.ny):
-                # Get normalized wave value (-1 to 1)
+                screen_y = j * 5
+                if screen_y < GROUND_Y:
+                    continue  
+                    
                 value = self.wave_sim.u[i, j] * self.wave_scale
-                value = max(-1, min(1, value))  # Clamp to [-1, 1]
+                value = max(-1, min(1, value))  
                 
-                # Convert to color based on mode
-                if self.color_mode == 'seismic':
-                    # Red-blue seismic color scheme
+                if abs(value) > 0.1:  
                     if value > 0:
-                        color = (255, int(255*(1-value)), int(255*(1-value)))
+                        r = 255
+                        g = int(255*(1-value))
+                        b = int(255*(1-value))
                     else:
-                        color = (int(255*(1+value)), int(255*(1+value)), 255)
-                # Draw the cell (5px per grid cell)
-                pygame.draw.rect(self.screen, color, (i*5, j*5, 5, 5))
+                        r = int(255*(1+value))
+                        g = int(255*(1+value))
+                        b = 255
+
+                    ground_color = GAME_COLOR['BROWN']
+                    alpha = abs(value) 
+                    r = int(r * alpha + ground_color[0] * (1-alpha))
+                    g = int(g * alpha + ground_color[1] * (1-alpha))
+                    b = int(b * alpha + ground_color[2] * (1-alpha))
+                    color = (r, g, b)
+                    pygame.draw.rect(self.screen, color, (i*5, j*5, 5, 5))
+                else:
+                    pygame.draw.rect(self.screen, GAME_COLOR['BROWN'], (i*5, j*5, 5, 5))
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             
-            if x < RIGHT_PANEL_X and y < SCREEN_HEIGHT:
+            if x < RIGHT_PANEL_X and y < SCREEN_HEIGHT and y > GROUND_Y:
                 if not self.submitted:
                     self.selected_x, self.selected_y = x, y
                     self.x_text, self.y_text = str(x), str(y)

@@ -21,8 +21,11 @@ class Simulator:
                     pygame.quit()
                     sys.exit()
                 self.display.handle_event(event)
+            
+            self.display.update()
             self.display.render()
             pygame.display.update()
+            self.clock.tick(60)
 
 
 if __name__ == "__main__":

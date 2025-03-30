@@ -1,15 +1,15 @@
 import numpy as np
 
 class WaveSimulation:
-    def __init__(self, grid_size=(100, 100), dx=5.0, dt=0.05):
+    def __init__(self, grid_size=(100, 100), dx=5.0, dt=0.05, r=1.0, m=1.0, l=2.0, d=0.01):
         self.nx, self.ny = grid_size
         self.dx, self.dy = dx, dx  # Grid spacing (matches pixel size)
         self.dt = dt  # Time step
         
         # Material properties (adjust these for different wave behaviors)
-        self.rho = 1.0  # Density
-        self.mu = 1.0   # Shear modulus
-        self.lam = 2.0  # Second Lamé parameter
+        self.rho = r  # Density
+        self.mu = m   # Shear modulus
+        self.lam = l  # Second Lamé parameter
         
         # Wave velocities
         self.vp = np.sqrt((self.lam + 2 * self.mu) / self.rho)  # P-wave velocity
@@ -21,7 +21,7 @@ class WaveSimulation:
         self.a = np.zeros((self.nx, self.ny))  # Acceleration
         
         # Damping coefficient (for wave energy dissipation)
-        self.damping = 0.01
+        self.damping = d
         
         # Source parameters
         self.source_x = None

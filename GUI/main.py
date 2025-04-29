@@ -1,5 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import numpy as np
+from P_wave_disp import PWaveDisplacement
+from P_wave_pressure import PWavePressure
+from S_wave import SWave
+from seismogram import Seismogram
+from show_video import VideoPlayer
 
 # ===== Materials List =====
 materials = [
@@ -8,6 +14,28 @@ materials = [
     "Chalk", "Coal", "Salt", "Anhydrites", "Limestones", "Dolomites",
     "Granite", "Basalt", "Gneiss"
 ]
+
+materials_dict = {
+    "Air" : (343, 0),
+    "Water" : (1500,0), 
+    "Ice" : (3800, 1900), 
+    "Oil" : (1250, 0), 
+    "Vegetal Soil" :(700, 300), 
+    "Dry Sands":(1200, 500), 
+    "Wet Sands":(2000,600),
+    "Saturated Shales and Clays" :(2500,800), 
+    "Porous and Saturated Sandstones" :(3500,1800), 
+    "Marls":(3000, 1500),
+    "Chalk":(2600, 1300), 
+    "Coal":(2700, 1400), 
+    "Salt":(5500,3100), 
+    "Anhydrites":(5500, 3100), 
+    "Limestones":(6000, 3300), 
+    "Dolomites":(6500,3600),
+    "Granite":(6000, 3300), 
+    "Basalt":(6000, 3400), 
+    "Gneiss":(5200, 3200)
+}
 
 # ===== Main Application Class =====
 class MainApp(tk.Tk):
@@ -41,13 +69,39 @@ class MainApp(tk.Tk):
         self.material_status_label = tk.Label(self, text="Material Status: Not Submitted", font="Arial 14", fg="red")
         self.material_status_label.pack(pady=10)
 
+        open_pwave_dis_btn = tk.Button(self, text="P-wave Displacement Animation", font="Arial 16", command=self.open_Pwave_displacement)
+        open_pwave_dis_btn.pack(pady=10)
+
+        open_pwave_pres_btn = tk.Button(self, text="P-wave Pressure Animation", font="Arial 16", command=self.open_Pwave_pressure)
+        open_pwave_pres_btn.pack(pady=10)
+
+        open_swave_dis_btn = tk.Button(self, text="S-wave Displacement Animation", font="Arial 16", command=self.open_Swave_displacement)
+        open_swave_dis_btn.pack(pady=10)
+
+        open_swave_pres_btn = tk.Button(self, text="S-wave Pressure Animation", font="Arial 16", command=self.open_Swave_pressure)
+        open_swave_pres_btn.pack(pady=10)
+
+        open_seis_combined_btn = tk.Button(self, text="Seismogram Combined (P+S) Animation", font="Arial 16", command=self.open_seis_combined)
+        open_seis_combined_btn.pack(pady=10)
+
+        open_seis_separated_btn = tk.Button(self, text="Seismogram Separated (P,S) Animation", font="Arial 16", command=self.open_seis_separated)
+        open_seis_separated_btn.pack(pady=10)
+
     def open_input_window(self):
+        if self.has_submit_input: 
+            messagebox.showerror("Error", "Input has been submitted")
+            return
+        
         if self.input_window is None or not self.input_window.winfo_exists():
             self.input_window = InputWindow(self)
         else:
             messagebox.showerror("Error", "Parameter Input Window is already open.")
 
     def open_material_window(self):
+        if self.has_submit_material: 
+            messagebox.showerror("Error", "Material parameter has been submitted")
+            return
+
         # Update NY if InputWindow is opened and submitted
         if self.has_submit_input:
             self.NY_value = self.NY
@@ -71,11 +125,85 @@ class MainApp(tk.Tk):
         """Update the material submission status."""
         self.has_submit_material = True
         text = ""
-        print(self.material_list)
+        self.VEL_P = np.zeros((self.NX, self.NY))
+        self.VEL_S = np.zeros((self.NX, self.NY))
+
         for (fromval, toval, material) in self.material_list:
             text += f"Layer ({fromval} to {toval}): {material}\n"
+            self.VEL_P[:, fromval:toval] = materials_dict[material][0]
+            self.VEL_S[:, fromval:toval] = materials_dict[material][1]
 
         self.material_status_label.config(text=f"Material Status: Submitted\n{text}", fg="green")
+
+    def open_Pwave_displacement(self):
+        if not self.has_submit_input or not self.has_submit_material: 
+            messagebox.showerror("Error", "Please submit the input and materials first.")
+            return
+
+        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P)
+        window.run_wavelet_eq()
+        window.create_figure()
+
+        video_window = VideoPlayer(self, "test_disp_wave1.mp4")
+
+    def open_Pwave_pressure(self):
+        if not self.has_submit_input or not self.has_submit_material: 
+            messagebox.showerror("Error", "Please submit the input and materials first.")
+            return
+
+        window = PWavePressure(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_P)
+        window.run_wavelet_eq()
+        window.create_figure()
+
+        video_window = VideoPlayer(self, "test_p_wave1.mp4")
+    
+    def open_Swave_displacement(self):
+        if not self.has_submit_input or not self.has_submit_material: 
+            messagebox.showerror("Error", "Please submit the input and materials first.")
+            return
+
+        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S)
+        window.run_wavelet_eq()
+        window.create_figure_displacement()
+
+        video_window = VideoPlayer(self, "test_s_wave1.mp4")
+
+    def open_Swave_pressure(self):
+        if not self.has_submit_input or not self.has_submit_material: 
+            messagebox.showerror("Error", "Please submit the input and materials first.")
+            return
+
+        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S)
+        window.run_wavelet_eq()
+        window.create_figure_stress()
+
+        video_window = VideoPlayer(self, "test_s_wave_stress_2.mp4")
+
+    def open_seis_combined(self):
+        if not self.has_submit_input or not self.has_submit_material: 
+            messagebox.showerror("Error", "Please submit the input and materials first.")
+            return
+
+        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S)
+        window.compute()
+        window.create_combined_figure()
+
+        video_window = VideoPlayer(self, "combined_seismogram.mp4")
+
+    def open_seis_separated(self):
+        if not self.has_submit_input or not self.has_submit_material: 
+            messagebox.showerror("Error", "Please submit the input and materials first.")
+            return
+
+        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S)
+        window.compute()
+        window.create_separated_figure()
+
+        video_window = VideoPlayer(self, "separated_seismogram.mp4")
+
+    def play(self):
+        video_window = VideoPlayer(self, "test_disp_wave1.mp4")
+
 
 
 # ===== Input Window Class =====

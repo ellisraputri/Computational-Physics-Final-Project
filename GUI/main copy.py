@@ -1,41 +1,15 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import numpy as np
+from libcomcat.dataframes import get_summary_data_frame
+from libcomcat.search import search, get_event_by_id
+from datetime import datetime
+import netCDF4 as nc
 from P_wave_disp import PWaveDisplacement
 from P_wave_pressure import PWavePressure
 from S_wave import SWave
 from seismogram import Seismogram
 from show_video import VideoPlayer
-
-# ===== Materials List =====
-materials = [
-    "Air", "Water", "Ice", "Oil", "Vegetal Soil", "Dry Sands", "Wet Sands",
-    "Saturated Shales and Clays", "Porous and Saturated Sandstones", "Marls",
-    "Chalk", "Coal", "Salt", "Anhydrites", "Limestones", "Dolomites",
-    "Granite", "Basalt", "Gneiss"
-]
-
-materials_dict = {
-    "Air" : (343, 0),
-    "Water" : (1500,0), 
-    "Ice" : (3800, 1900), 
-    "Oil" : (1250, 0), 
-    "Vegetal Soil" :(700, 300), 
-    "Dry Sands":(1200, 500), 
-    "Wet Sands":(2000,600),
-    "Saturated Shales and Clays" :(2500,800), 
-    "Porous and Saturated Sandstones" :(3500,1800), 
-    "Marls":(3000, 1500),
-    "Chalk":(2600, 1300), 
-    "Coal":(2700, 1400), 
-    "Salt":(5500,3100), 
-    "Anhydrites":(5500, 3100), 
-    "Limestones":(6000, 3300), 
-    "Dolomites":(6500,3600),
-    "Granite":(6000, 3300), 
-    "Basalt":(6000, 3400), 
-    "Gneiss":(5200, 3200)
-}
 
 # ===== Main Application Class =====
 class MainApp(tk.Tk):
@@ -126,22 +100,19 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Material parameter has been submitted")
             return
 
-        # Update NY if InputWindow is opened and submitted
-        if self.has_submit_input:
-            self.NY_value = self.NY
-        else:
+        if not self.has_submit_input:
             messagebox.showerror("Error", "Please fill in the input window first")
             return
 
         if self.material_window is None or not self.material_window.winfo_exists():
-            self.material_window = MaterialWindow(self, self.NY_value)
+            self.material_window = MaterialWindow(self)
         else:
             messagebox.showerror("Error", "Material Window is already open.")
 
     def update_input_status(self):
         """Update the input submission status."""
         self.has_submit_input = True
-        text = f"NX = {self.NX} \nNY = {self.NY} \nXMIN = {self.XMIN} \nXMAX = {self.XMAX} \nYMIN = {self.YMIN} \nYMAX = {self.YMAX} \nt_max = {self.t_max} \ndensity = {self.density}"
+        text = f"NX = {self.NX} \nNY = {self.NY} \nXMIN = {self.XMIN} \nXMAX = {self.XMAX} \nYMIN = {self.YMIN} \nYMAX = {self.YMAX} \nt_max = {self.t_max}"
         
         self.input_status_label.config(text=f"Input Status: Submitted \n {text} ", fg="green")
 
@@ -154,8 +125,8 @@ class MainApp(tk.Tk):
 
         for (fromval, toval, material) in self.material_list:
             text += f"Layer ({fromval} to {toval}): {material}\n"
-            self.VEL_P[:, fromval:toval] = materials_dict[material][0]
-            self.VEL_S[:, fromval:toval] = materials_dict[material][1]
+            # self.VEL_P[:, fromval:toval] = materials_dict[material][0]
+            # self.VEL_S[:, fromval:toval] = materials_dict[material][1]
 
         self.material_status_label.config(text=f"Material Status: Submitted\n{text}", fg="green")
 
@@ -164,66 +135,66 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, "synthethic")
+        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, "real")
         window.run_wavelet_eq()
         window.create_figure()
 
-        video_window = VideoPlayer(self, "synthethic_test_disp_wave1.mp4")
+        video_window = VideoPlayer(self, "real_test_disp_wave1.mp4")
 
     def open_Pwave_pressure(self):
         if not self.has_submit_input or not self.has_submit_material: 
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = PWavePressure(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_P, "synthethic")
+        window = PWavePressure(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_P, "real")
         window.run_wavelet_eq()
         window.create_figure()
 
-        video_window = VideoPlayer(self, "synthethic_test_p_wave1.mp4")
+        video_window = VideoPlayer(self, "real_test_p_wave1.mp4")
     
     def open_Swave_displacement(self):
         if not self.has_submit_input or not self.has_submit_material: 
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S,"synthethic")
+        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S,"real")
         window.run_wavelet_eq()
         window.create_figure_displacement()
 
-        video_window = VideoPlayer(self, "synthethic_test_s_wave1.mp4")
+        video_window = VideoPlayer(self, "real_test_s_wave1.mp4")
 
     def open_Swave_pressure(self):
         if not self.has_submit_input or not self.has_submit_material: 
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S, "synthethic")
+        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S, "real")
         window.run_wavelet_eq()
         window.create_figure_stress()
 
-        video_window = VideoPlayer(self, "synthethic_test_s_wave_stress_2.mp4")
+        video_window = VideoPlayer(self, "real_test_s_wave_stress_2.mp4")
 
     def open_seis_combined(self):
         if not self.has_submit_input or not self.has_submit_material: 
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S, "synthethic")
+        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S, "real")
         window.compute()
         window.create_combined_figure()
 
-        video_window = VideoPlayer(self, "synthethic_combined_seismogram.mp4")
+        video_window = VideoPlayer(self, "real_combined_seismogram.mp4")
 
     def open_seis_separated(self):
         if not self.has_submit_input or not self.has_submit_material: 
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S,"synthethic")
+        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S,"real")
         window.compute()
         window.create_separated_figure()
 
-        video_window = VideoPlayer(self, "synthethic_separated_seismogram.mp4")
+        video_window = VideoPlayer(self, "real_separated_seismogram.mp4")
 
     
 
@@ -249,7 +220,6 @@ class InputFrame(tk.Frame):
             ("YMIN:", "0.0"),
             ("YMAX:", "4000.0"),
             ("t_max:", "4.0"),
-            ("Density:", "2200"),
         ]
 
         for i, (label_text, default_value) in enumerate(fields):
@@ -271,7 +241,6 @@ class InputFrame(tk.Frame):
             self.master.master.YMIN = float(self.entries["ymin"].get())
             self.master.master.YMAX = float(self.entries["ymax"].get())
             self.master.master.t_max = float(self.entries["t_max"].get())
-            self.master.master.density = float(self.entries["density"].get())
 
             print("NX =", self.master.master.NX)
             print("NY =", self.master.master.NY)
@@ -280,7 +249,6 @@ class InputFrame(tk.Frame):
             print("YMIN =", self.master.master.YMIN)
             print("YMAX =", self.master.master.YMAX)
             print("t_max =", self.master.master.t_max)
-            print("density =", self.master.master.density)
 
             messagebox.showinfo("Success", "Parameters submitted successfully!")
             self.master.master.update_input_status()  # Update the status in the main app
@@ -319,113 +287,109 @@ class InputWindow(tk.Toplevel):
 
 
 # ===== Material Window Class =====
-class MaterialFrame(tk.Frame):
-    def __init__(self, master, NY, on_validate):
+class MaterialWindow(tk.Toplevel):
+    def __init__(self, master):
         super().__init__(master)
-        self.master = master
-        self.NY = NY
-        self.on_validate = on_validate
-        self.rows = []
+        self.title("Material Window")
+        self.geometry("800x600")
+        self.dataframe = None  # To store the generated dataframe
+
         self.create_widgets()
 
     def create_widgets(self):
-        container = tk.Frame(self)
-        canvas = tk.Canvas(container, height=400)
-        scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
-        self.scrollable_frame = tk.Frame(canvas)
+        # Start datetime input
+        tk.Label(self, text="Start Datetime (YYYY-MM-DD HH:MM)").grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        self.start_entry = tk.Entry(self, width=25)
+        self.start_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
+        # End datetime input
+        tk.Label(self, text="End Datetime (YYYY-MM-DD HH:MM)").grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        self.end_entry = tk.Entry(self, width=25)
+        self.end_entry.grid(row=1, column=1, padx=10, pady=5)
 
-        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
+        # Generate button
+        generate_btn = tk.Button(self, text="Generate Dataframe", command=self.generate_dataframe)
+        generate_btn.grid(row=2, column=0, columnspan=2, pady=10)
 
-        container.pack(fill="both", expand=True)
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # Frame to hold the Treeview and scrollbars
+        tree_frame = tk.Frame(self)
+        tree_frame.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
-        tk.Label(self.scrollable_frame, text="Velocity Input", font="Arial 16 bold").grid(row=0, column=0, columnspan=3, pady=10)
-        tk.Label(self.scrollable_frame, text="From", font="Arial 14 bold").grid(row=1, column=0, padx=30, pady=10)
-        tk.Label(self.scrollable_frame, text="To", font="Arial 14 bold").grid(row=1, column=1, padx=30, pady=10)
-        tk.Label(self.scrollable_frame, text="Material", font="Arial 14 bold").grid(row=1, column=2, padx=30, pady=10)
+        # Treeview to display the dataframe
+        self.tree = ttk.Treeview(tree_frame, columns=("Index", "ID", "Latitude", "Longitude", "Location"), show="headings")
+        self.tree.heading("Index", text="Index")
+        self.tree.heading("ID", text="ID")
+        self.tree.heading("Latitude", text="Latitude")
+        self.tree.heading("Longitude", text="Longitude")
+        self.tree.heading("Location", text="Location")
+        self.tree.pack(side="left", fill="both", expand=True)
 
-        self.add_row()
+        # Add vertical scrollbar
+        v_scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        v_scrollbar.pack(side="right", fill="y")
+        self.tree.configure(yscrollcommand=v_scrollbar.set)
 
-        button_frame = tk.Frame(self)
-        button_frame.pack(pady=10)
+        # Add horizontal scrollbar
+        h_scrollbar = ttk.Scrollbar(self, orient="horizontal", command=self.tree.xview)
+        h_scrollbar.grid(row=4, column=0, columnspan=2, sticky="ew")
+        self.tree.configure(xscrollcommand=h_scrollbar.set)
 
-        add_btn = tk.Button(button_frame, text="Add Layer", command=self.add_row, font="Arial 14")
-        add_btn.grid(row=0, column=0, padx=10)
+        # Row selection input
+        tk.Label(self, text="Enter Row Index:").grid(row=5, column=0, padx=10, pady=5, sticky="w")
+        self.row_entry = tk.Entry(self, width=10)
+        self.row_entry.grid(row=5, column=1, padx=10, pady=5, sticky="w")
 
-        validate_btn = tk.Button(button_frame, text="Validate Layers", command=self.validate_and_send, font="Arial 14")
-        validate_btn.grid(row=0, column=1, padx=10)
+        # Select button
+        select_btn = tk.Button(self, text="Select Row", command=self.select_row)
+        select_btn.grid(row=6, column=0, columnspan=2, pady=10)
 
-    def validate_and_send(self):
+        # Configure grid weights
+        self.grid_rowconfigure(3, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+
+    def generate_dataframe(self):
+        """Generate the dataframe based on the input datetimes."""
         try:
-            maximum_layer = 0
-            minimum_layer = self.NY
+            # Parse the start and end datetimes
+            start_datetime = datetime.strptime(self.start_entry.get(), "%Y-%m-%d %H:%M")
+            end_datetime = datetime.strptime(self.end_entry.get(), "%Y-%m-%d %H:%M")
 
-            for i, (from_entry, to_entry, dropdown) in enumerate(self.rows):
-                from_val = int(from_entry.get())
-                to_val = int(to_entry.get())
-                maximum_layer = max(to_val, maximum_layer)
-                minimum_layer = min(from_val, minimum_layer)
+            # Generate the dataframe
+            summary_events = search(starttime=start_datetime, endtime=end_datetime)
+            self.dataframe = get_summary_data_frame(summary_events)
 
-                if to_val > self.NY:
-                    raise ValueError(f"Row {i+1}: 'To' height ({to_val}) exceeds NY ({self.NY})")
+            # Clear the Treeview
+            for row in self.tree.get_children():
+                self.tree.delete(row)
 
-                material = dropdown.get()
-                print(f"Layer {i+1}: From {from_val} To {to_val} - {material}")
-                self.master.master.material_list.append((from_val, to_val, material))
+            # Populate the Treeview with the dataframe
+            for index, row in self.dataframe.iterrows():
+                self.tree.insert("", "end", values=(index, row["id"], row["latitude"], row["longitude"], row["location"]))
 
-            if maximum_layer < self.NY or minimum_layer > 0:
-                raise ValueError(f"All vertical layer height up to NY must have material specification.")
+        except ValueError:
+            messagebox.showerror("Error", "Invalid datetime format. Please use YYYY-MM-DD HH:MM.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
 
-            messagebox.showinfo("Success", "All layers are valid and printed to console.")
-            self.master.master.update_material_status()  # Update the status in the main app
-            self.master.destroy()
-        except ValueError as e:
-            messagebox.showerror("Validation Error", str(e))
-            self.master.master.material_list.clear()
+    def select_row(self):
+        """Handle row selection based on user input."""
+        try:
+            # Get the selected row index
+            row_index = int(self.row_entry.get())
+            if self.dataframe is None:
+                raise ValueError("No dataframe generated yet.")
 
-    def add_row(self):
-        row = len(self.rows) + 2
+            # Get the row data
+            selected_row = self.dataframe.iloc[row_index]
+            messagebox.showinfo("Row Selected", f"Selected Row:\n{selected_row.to_dict()}")
 
-        from_entry = tk.Entry(self.scrollable_frame, width=10, font="Arial 14")
-        from_entry.grid(row=row, column=0, padx=5, pady=5)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid row index.")
+        except IndexError:
+            messagebox.showerror("Error", "Row index out of range.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
 
-        to_entry = tk.Entry(self.scrollable_frame, width=10, font="Arial 14")
-        to_entry.grid(row=row, column=1, padx=5, pady=5)
-
-        material_var = tk.StringVar()
-        material_dropdown = ttk.Combobox(self.scrollable_frame, textvariable=material_var, values=materials, state="readonly", font="Arial 14")
-        material_dropdown.set(materials[0])
-        material_dropdown.grid(row=row, column=2, padx=5, pady=5)
-
-        self.rows.append((from_entry, to_entry, material_dropdown))
-
-
-class MaterialWindow(tk.Toplevel):
-    def __init__(self, master, NY):
-        super().__init__(master)
-        self.title("Define Material Layers")
-        self.geometry("650x500")
-        self.master = master  # Reference to MainApp
-        self.NY = NY
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
-
-        # Create the material frame
-        self.material_frame = MaterialFrame(self, self.NY, self.submit_layers)
-        self.material_frame.pack(fill="both", expand=True)
-
-    def submit_layers(self, data):
-        self.master.update_material_status()
-        self.destroy()
-
-    def on_close(self):
-        self.destroy()
 
 
 if __name__ == "__main__":

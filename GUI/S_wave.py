@@ -6,7 +6,8 @@ import matplotlib.animation as animation
 from scipy.ndimage import gaussian_filter
 
 class SWave():
-    def __init__(self, NX, NY, XMIN, XMAX, YMIN, YMAX, t_max, VEL_S):
+    def __init__(self, NX, NY, XMIN, XMAX, YMIN, YMAX, t_max, VEL_S, name):
+        self.name = name
         self.NX = NX
         self.NY = NY
         self.XMIN = XMIN
@@ -109,7 +110,7 @@ class SWave():
 
         ani = FuncAnimation(fig, self.update, frames=self.NT//self.PLOT_EVERY, interval=50, blit=True)
         ffmpeg_writer = animation.FFMpegWriter(fps=20)
-        ani.save('test_s_wave1.mp4', writer=ffmpeg_writer)
+        ani.save(self.name+'_test_s_wave1.mp4', writer=ffmpeg_writer)
 
 
     def update(self,frame):
@@ -142,7 +143,7 @@ class SWave():
 
         ani_stress = FuncAnimation(fig, self.update_stress, frames=self.NT//self.PLOT_EVERY, interval=50, blit=True)
         ffmpeg_writer = animation.FFMpegWriter(fps=20)
-        ani_stress.save('test_s_wave_stress_2.mp4', writer=ffmpeg_writer)
+        ani_stress.save(self.name+'_test_s_wave_stress_2.mp4', writer=ffmpeg_writer)
 
     def update_stress(self,frame):
         for _ in range(self.PLOT_EVERY):

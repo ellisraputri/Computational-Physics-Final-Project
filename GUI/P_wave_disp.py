@@ -4,7 +4,8 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.animation as animation
 
 class PWaveDisplacement:
-    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P):
+    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P, name):
+        self.name = name
         self.NX = NX
         self.NY = NY
         self.XMIN = XMIN
@@ -95,7 +96,7 @@ class PWaveDisplacement:
         # Create animation
         ani = FuncAnimation(fig, self.update, frames=self.NT // self.PLOT_EVERY, interval=50, blit=True)
         ffmpeg_writer = animation.FFMpegWriter(fps=20)
-        ani.save('test_disp_wave1.mp4', writer=ffmpeg_writer)
+        ani.save(self.name+'_test_disp_wave1.mp4', writer=ffmpeg_writer)
 
 
 

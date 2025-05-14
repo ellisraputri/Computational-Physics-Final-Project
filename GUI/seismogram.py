@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Seismogram():
-    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P, VEL_S):
+    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P, VEL_S, name):
+        self.name =name
         self.NX = NX
         self.NY = NY
         self.XMIN = XMIN
@@ -99,7 +100,7 @@ class Seismogram():
 
         ani = FuncAnimation(fig, self.update_combined, frames=self.frames, init_func=self.init_combined, interval=20, blit=True)
         ffmpeg_writer = animation.FFMpegWriter(fps=20)
-        ani.save('combined_seismogram.mp4', writer=ffmpeg_writer)
+        ani.save(self.name+'_combined_seismogram.mp4', writer=ffmpeg_writer)
 
     def init_combined(self):
         self.line.set_data([], [])
@@ -128,7 +129,7 @@ class Seismogram():
 
         ani = FuncAnimation(fig, self.update_separated, frames=self.frames, init_func=self.init_separated, interval=20, blit=True)
         ffmpeg_writer = animation.FFMpegWriter(fps=20)
-        ani.save('separated_seismogram.mp4', writer=ffmpeg_writer)
+        ani.save(self.name+'_separated_seismogram.mp4', writer=ffmpeg_writer)
 
     def init_separated(self):
         self.line_p.set_data([], [])

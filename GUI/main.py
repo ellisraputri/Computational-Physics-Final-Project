@@ -76,6 +76,7 @@ class MainApp(tk.Tk):
         self.has_submit_input = False
         self.has_submit_material = False
         self.material_list = []
+        
 
         self.create_widgets()
 
@@ -151,6 +152,8 @@ class MainApp(tk.Tk):
         text = ""
         self.VEL_P = np.zeros((self.NX, self.NY))
         self.VEL_S = np.zeros((self.NX, self.NY))
+        self.source_x, self.source_y = self.NX//4, self.NY//2  # Source position
+        self.rho = np.ones((self.NX, self.NY)) * 1000.0       #constant
 
         for (fromval, toval, material) in self.material_list:
             text += f"Layer ({fromval} to {toval}): {material}\n"
@@ -164,7 +167,7 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, "synthethic")
+        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.rho, "synthethic", self.source_x, self.source_y)
         window.run_wavelet_eq()
         window.create_figure()
 
@@ -175,7 +178,7 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = PWavePressure(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_P, "synthethic")
+        window = PWavePressure(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_P,self.rho, "synthethic", self.source_x, self.source_y)
         window.run_wavelet_eq()
         window.create_figure()
 
@@ -186,7 +189,7 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S,"synthethic")
+        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S, self.rho,"synthethic", self.source_x, self.source_y)
         window.run_wavelet_eq()
         window.create_figure_displacement()
 
@@ -197,7 +200,7 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S, "synthethic")
+        window = SWave(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_S, self.rho, "synthethic", self.source_x, self.source_y)
         window.run_wavelet_eq()
         window.create_figure_stress()
 
@@ -208,7 +211,7 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S, "synthethic")
+        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S, self.rho, "synthethic", self.source_x)
         window.compute()
         window.create_combined_figure()
 
@@ -219,7 +222,7 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S,"synthethic")
+        window = Seismogram(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.VEL_S, self.rho,"synthethic", self.source_x)
         window.compute()
         window.create_separated_figure()
 

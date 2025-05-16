@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.animation as animation
 
 class PWaveDisplacement:
-    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P, name):
+    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P, RHO, name, source_x, source_y):
         self.name = name
         self.NX = NX
         self.NY = NY
@@ -17,7 +17,9 @@ class PWaveDisplacement:
         time = np.arange(0, t_max, self.DT)
         self.NT = len(time)
         self.VEL = VEL_P
-        self.RHO = np.ones((NX, NY)) * 1000.0       #constant
+        self.RHO = RHO
+        self.source_x = source_x
+        self.source_y = source_y
 
         self.K = np.ones((NX, NY)) * 5e9  # Higher K → faster P-wave
         self.ux = np.zeros((NX, NY))
@@ -39,7 +41,6 @@ class PWaveDisplacement:
         return (1.0 - 2.0*(np.pi*f0*t)**2) * np.exp(-(np.pi*f0*t)**2)
     
     def run_wavelet_eq(self):
-        self.source_x, self.source_y = self.NX//4, self.NY//2  # Source position
         source_times = np.arange(self.NT) * self.DT # Time values
         self.source_amp = self.ricker_wavelet(source_times - 0.1, f0=20.0) * 1e6  
 

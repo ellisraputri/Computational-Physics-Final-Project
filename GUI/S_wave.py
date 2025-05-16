@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 from scipy.ndimage import gaussian_filter
 
 class SWave():
-    def __init__(self, NX, NY, XMIN, XMAX, YMIN, YMAX, t_max, VEL_S, name):
+    def __init__(self, NX, NY, XMIN, XMAX, YMIN, YMAX, t_max, VEL_S, RHO, name, source_x, source_y):
         self.name = name
         self.NX = NX
         self.NY = NY
@@ -21,8 +21,10 @@ class SWave():
         time = np.arange(0, t_max, self.DT)
         self.NT = len(time)
         self.VS = VEL_S
-        self.RHO = np.ones((NX, NY)) * 1000.0       #constant
+        self.RHO = RHO
         self.MU = self.RHO * self.VS**2  # Shear modulus
+        self.source_x = source_x
+        self.source_y = source_y
 
         self.ux = np.zeros((NX, NY))
         self.uy = np.zeros((NX, NY))
@@ -41,7 +43,6 @@ class SWave():
         return (1.0 - 2.0*(np.pi*f0*t)**2) * np.exp(-(np.pi*f0*t)**2)
     
     def run_wavelet_eq(self):
-        self.source_x, self.source_y = self.NX//4, self.NY//2  # Source position
         source_times = np.arange(self.NT) * self.DT # Time values
         self.source_amp = self.ricker_wavelet(source_times - 0.1, f0=15.0) * 1e6  
 

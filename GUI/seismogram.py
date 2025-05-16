@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Seismogram():
-    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P, VEL_S, name):
+    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P, VEL_S, RHO, name, source_x):
         self.name =name
         self.NX = NX
         self.NY = NY
@@ -19,9 +19,9 @@ class Seismogram():
         self.frames = len(self.time) // self.PLOT_EVERY
         self.VEL_P = VEL_P
         self.VEL_S = VEL_S
-        self.RHO = np.ones((NX, NY)) * 1000.0
+        self.RHO = RHO
 
-        self.source_x = NX // 4
+        self.source_x = source_x
         self.vp_profile = self.VEL_P[self.source_x, :]
         self.vs_profile = self.VEL_S[self.source_x, :]
         self.rho_profile = self.RHO[self.source_x, :]

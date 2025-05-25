@@ -44,30 +44,44 @@ class MainApp(tk.Tk):
         self.title("Main Menu")
         self.geometry("1200x800")
 
-        # Create a container frame for the canvas and scrollbar
+        # Create a container frame for the main layout
         container = tk.Frame(self)
         container.pack(fill="both", expand=True)
 
-        # Create a canvas widget
+        # Left: Canvas with scrollable frame
         self.canvas = tk.Canvas(container)
         self.canvas.pack(side="left", fill="both", expand=True)
 
-        # Add a vertical scrollbar linked to the canvas
         scrollbar = tk.Scrollbar(container, orient="vertical", command=self.canvas.yview)
-        scrollbar.pack(side="right", fill="y")
+        scrollbar.pack(side="left", fill="y")
 
-        # Configure the canvas to use the scrollbar
         self.canvas.configure(yscrollcommand=scrollbar.set)
 
-        # Create a frame inside the canvas to hold the widgets
         self.scrollable_frame = tk.Frame(self.canvas)
         self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
 
-        # Bind the <Configure> event to update the scrollregion
         self.scrollable_frame.bind(
             "<Configure>",
             lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         )
+
+        # Right: Info/Instruction frame
+        self.right_frame = tk.Frame(container, width=350, bg="white")
+        self.right_frame.pack(side="left", fill="y")
+
+        self.info_label = tk.Label(
+            self.right_frame,
+            text="Welcome to the Seismic Simulation App!\n\n"
+                 "Instructions:\n"
+                 "- Fill in parameters and materials on the left.\n"
+                 "- Use the buttons to run simulations and view results.\n"
+                 "- Results and status will be shown here or in pop-up windows.",
+            bg="white",
+            font="Arial 16",
+            wraplength=320,
+            justify="left"
+        )
+        self.info_label.pack(padx=15, pady=15, anchor="n")
 
         # Initialize the application content
         self.input_window = None
@@ -76,7 +90,6 @@ class MainApp(tk.Tk):
         self.has_submit_input = False
         self.has_submit_material = False
         self.material_list = []
-        
 
         self.create_widgets()
 
@@ -162,6 +175,7 @@ class MainApp(tk.Tk):
 
         self.material_status_label.config(text=f"Material Status: Submitted\n{text}", fg="green")
 
+
     def open_Pwave_displacement(self):
         if not self.has_submit_input or not self.has_submit_material: 
             messagebox.showerror("Error", "Please submit the input and materials first.")
@@ -193,7 +207,14 @@ class MainApp(tk.Tk):
         window.run_wavelet_eq()
         window.create_figure_displacement()
 
+        seismic_moment = window.get_seismic_moment()
+        magnitude = window.get_moment_magnitude_scale()
+        energy = window.get_energy_released()
+        self.info_label.config(text=f"Seismic moment = {seismic_moment} \nMagnitude = {magnitude} \nEnergy Released= {energy}")
+        print(f"Seismic moment = {seismic_moment} \nMagnitude = {magnitude} \nEnergy Released= {energy}")
+
         video_window = VideoPlayer(self, "synthethic_test_s_wave1.mp4")
+
 
     def open_Swave_pressure(self):
         if not self.has_submit_input or not self.has_submit_material: 

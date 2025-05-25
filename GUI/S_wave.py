@@ -17,6 +17,7 @@ class SWave():
         self.PLOT_EVERY = 5
 
         self.DX = (XMAX - XMIN) / NX
+        self.DY = (YMAX - YMIN) / NY
         self.DT = 0.001
         time = np.arange(0, t_max, self.DT)
         self.NT = len(time)
@@ -59,9 +60,9 @@ class SWave():
         
         # Central differences for derivatives
         dux_dx[1:-1, 1:-1] = (self.ux[2:, 1:-1] - self.ux[:-2, 1:-1]) / (2*self.DX)
-        dux_dy[1:-1, 1:-1] = (self.ux[1:-1, 2:] - self.ux[1:-1, :-2]) / (2*self.DX)
+        dux_dy[1:-1, 1:-1] = (self.ux[1:-1, 2:] - self.ux[1:-1, :-2]) / (2*self.DY)
         duy_dx[1:-1, 1:-1] = (self.uy[2:, 1:-1] - self.uy[:-2, 1:-1]) / (2*self.DX)
-        duy_dy[1:-1, 1:-1] = (self.uy[1:-1, 2:] - self.uy[1:-1, :-2]) / (2*self.DX)
+        duy_dy[1:-1, 1:-1] = (self.uy[1:-1, 2:] - self.uy[1:-1, :-2]) / (2*self.DY)
         
         tau_xy_now = self.MU * (duy_dx + dux_dy)
         self.tau_xy[:, :] = tau_xy_now
@@ -73,7 +74,7 @@ class SWave():
         ux_new[1:-1, 1:-1] = (
             2*self.ux[1:-1, 1:-1] - self.ux_prev[1:-1, 1:-1] +
             (self.DT**2 / self.RHO[1:-1, 1:-1]) * (
-                (tau_xy_now[1:-1, 2:] - tau_xy_now[1:-1, :-2]) / (2*self.DX)  # ∂τ_xy/∂y
+                (tau_xy_now[1:-1, 2:] - tau_xy_now[1:-1, :-2]) / (2*self.DY)  # ∂τ_xy/∂y
             )
         )
         

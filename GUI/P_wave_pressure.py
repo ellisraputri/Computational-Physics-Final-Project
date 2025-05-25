@@ -15,6 +15,7 @@ class PWavePressure():
         self.PLOT_EVERY = 5
 
         self.DX = (XMAX - XMIN) / NX
+        self.DY = (YMAX - YMIN) / NY
         self.DT = 0.001
         time = np.arange(0, t_max, self.DT)
         self.NT = len(time)

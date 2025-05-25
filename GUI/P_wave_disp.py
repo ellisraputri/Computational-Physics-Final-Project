@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.animation as animation
 
 class PWaveDisplacement:
-    def __init__(self, NX, NY, XMIN, XMAX, t_max, VEL_P, RHO, name, source_x, source_y):
+    def __init__(self, NX, NY, XMIN, XMAX, YMIN, YMAX, t_max, VEL_P, RHO, name, source_x, source_y):
         self.name = name
         self.NX = NX
         self.NY = NY
@@ -13,6 +13,7 @@ class PWaveDisplacement:
         self.PLOT_EVERY = 5
 
         self.DX = (XMAX - XMIN) / NX
+        self.DY = (YMAX - YMIN) / NY 
         self.DT = 0.001
         time = np.arange(0, t_max, self.DT)
         self.NT = len(time)
@@ -52,14 +53,14 @@ class PWaveDisplacement:
         div_u = np.zeros((self.NX, self.NY))
         div_u[1:-1, 1:-1] = (
             (self.ux[2:, 1:-1] - self.ux[:-2, 1:-1]) / (2 * self.DX) + (
-            (self.uy[1:-1, 2:] - self.uy[1:-1, :-2]) / (2 * self.DX)
+            (self.uy[1:-1, 2:] - self.uy[1:-1, :-2]) / (2 * self.DY)
         ))
 
         # ∇(∇·u)
         grad_div_x = np.zeros((self.NX, self.NY))
         grad_div_y = np.zeros((self.NX, self.NY))
         grad_div_x[1:-1, 1:-1] = (div_u[2:, 1:-1] - div_u[:-2, 1:-1]) / (2 * self.DX)
-        grad_div_y[1:-1, 1:-1] = (div_u[1:-1, 2:] - div_u[1:-1, :-2]) / (2 * self.DX)
+        grad_div_y[1:-1, 1:-1] = (div_u[1:-1, 2:] - div_u[1:-1, :-2]) / (2 * self.DY)
 
         ux_new = (
             2 * self.ux - self.ux_prev + (self.DT**2 / self.RHO) * self.K * grad_div_x

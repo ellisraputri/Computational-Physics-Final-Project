@@ -167,7 +167,7 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.rho, "synthethic", self.source_x, self.source_y)
+        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_P, self.rho, "synthethic", self.source_x, self.source_y)
         window.run_wavelet_eq()
         window.create_figure()
 

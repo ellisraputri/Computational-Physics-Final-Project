@@ -6,7 +6,7 @@ from math import cos
 from scipy.interpolate import interp1d
 
 class RealDataProcess():
-    def __init__(self, latitude, longitude, NX, NY, XMIN, XMAX, YMIN, YMAX):
+    def __init__(self, latitude, longitude, real_depth, NX, NY, XMIN, XMAX, YMIN, YMAX):
         self.vp_dataset = nc.Dataset('CRUST1.0-vp.r0.1.nc')
         self.vs_dataset = nc.Dataset('CRUST1.0-vs.r0.1.nc')
         self.rho_dataset = nc.Dataset('CRUST1.0-rho.r0.1.nc')
@@ -15,6 +15,7 @@ class RealDataProcess():
         self.longitude = longitude
         if longitude < 0:
             self.longitude += 360
+        self.depth = real_depth*1000
         self.NX = NX
         self.NY = NY
         self.XMIN = XMIN
@@ -111,12 +112,11 @@ class RealDataProcess():
         origin_lat = epicenter[0] - (self.YMAX / 2) * deg_per_meter_lat
         origin_lon = epicenter[1]- (self.XMAX / 2) * deg_per_meter_lon
 
-        y_meters = geodesic((origin_lat, origin_lon), (epicenter[0], origin_lon)).meters
         x_meters = geodesic((origin_lat, origin_lon), (origin_lat, epicenter[1])).meters
 
         # Convert to grid index
         self.source_x = min(max(int(x_meters / DX), 0), self.NX - 1)
-        self.source_y = min(max(int(y_meters / DY), 0), self.NY - 1)
+        self.source_y = min(max(int(self.depth / DY), 0), self.NY - 1)
 
         depth_target = np.linspace(0, self.YMAX, self.NY)  # in meters
 

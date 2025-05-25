@@ -124,7 +124,7 @@ class MainApp(tk.Tk):
         text = f"Location: {self.data_dict['location']} \nLatitude: {self.data_dict['latitude']} \nLongitude: {self.data_dict['longitude']} \nDepth: {self.data_dict['depth']} \nMagnitude: {self.data_dict['magnitude']}"
         self.material_status_label.config(text=f"Material Status: Submitted\n{text}", fg="green")
 
-        real_data_processing = RealDataProcess(self.data_dict['latitude'], self.data_dict['longitude'], self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX)
+        real_data_processing = RealDataProcess(self.data_dict['latitude'], self.data_dict['longitude'], self.data_dict['depth'], self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX)
         real_data_processing.process()
         real_data_processing.calculate()
         self.source_x = real_data_processing.source_x
@@ -138,7 +138,7 @@ class MainApp(tk.Tk):
             messagebox.showerror("Error", "Please submit the input and materials first.")
             return
 
-        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.t_max, self.VEL_P, self.RHO, "real",self.source_x, self.source_y)
+        window = PWaveDisplacement(self.NX, self.NY, self.XMIN, self.XMAX, self.YMIN, self.YMAX, self.t_max, self.VEL_P, self.RHO, "real",self.source_x, self.source_y)
         window.run_wavelet_eq()
         window.create_figure()
 

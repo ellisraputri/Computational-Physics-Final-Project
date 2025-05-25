@@ -153,5 +153,59 @@ class SWave():
         self.img.set_array(tau_smoothed.T)
         self.img.set_clim(-np.max(np.abs(tau_smoothed)), np.max(np.abs(tau_smoothed)))  # Auto-scale
         return [self.img]
+    
+    def get_seismic_moment(self):
+        print('masuk sesismic momemnt')
+        # Rupture zone (ex: 10x10)
+        rupture_radius = 5
+        x_start, x_end = self.source_x - rupture_radius, self.source_x + rupture_radius
+        y_start, y_end = self.source_y - rupture_radius, self.source_y + rupture_radius
+
+        print(x_start, x_end, y_start, y_end)
+
+        ux_rupture = self.ux[x_start:x_end, y_start:y_end] #x displacement in rupture zone
+        uy_rupture = self.uy[x_start:x_end, y_start:y_end] #y displacement in rupture zone
+        mu_rupture = self.MU[x_start:x_end, y_start:y_end] #mu in rupture zone
+
+        print(ux_rupture, uy_rupture, mu_rupture)
+
+        # total movement/displacement per point
+        u_magnitude = np.sqrt(ux_rupture**2 + uy_rupture**2)
+
+        # Average displacement (\overline{u})
+        u_avg = np.mean(u_magnitude)
+
+        # Average shear modulus (\mu)
+        mu_avg = np.mean(mu_rupture)
+
+        print(u_magnitude, u_avg, mu_avg)
+
+        # Fracture area in m² (S)
+        # Each grid has physical size of DX, so the rupture area is a 10x10 square
+        # with the total area = (10 * DX) * (10 * DX) with 10 = 2 * rupture radius
+        S = ((2 * rupture_radius) * self.DX)**2  
+
+        print(S)
+
+        self.M0 = mu_avg * u_avg * S
+        print(self.M0)
+        return self.M0
+    
+    def get_moment_magnitude_scale(self):
+        print('masuk moment magnitude')
+        # convert M0 to dyne.cm
+        M0_dynecm = self.M0 * 10000000
+
+        print(M0_dynecm) 
+
+        # moment magnitude
+        self.Mw = (2/3) * math.log(M0_dynecm) - 10.7
+        return self.Mw
+
+    def get_energy_released(self):
+        print('masuk enegrgy')
+        print(self.Mw)
+        E = 10**(5.24 + (1.44 * self.Mw))    
+        return E
 
 

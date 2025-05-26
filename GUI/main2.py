@@ -48,7 +48,7 @@ class MainApp(tk.Tk):
             self.right_frame,
             text="Welcome to the Seismic Simulation App!\n\n"
                  "Instructions:\n"
-                 "- Fill in parameters and materials on the left.\n"
+                 "- Fill in parameters and select one earthquake from real data.\n"
                  "- Use the buttons to run simulations and view results.\n"
                  "- Results and status will be shown here or in pop-up windows.",
             bg="white",
@@ -76,10 +76,10 @@ class MainApp(tk.Tk):
         self.input_status_label = tk.Label(self.scrollable_frame, text="Input Status: Not Submitted\n\n\n", font="Arial 14", fg="red", justify="left")
         self.input_status_label.pack(pady=10, padx=10, anchor="w")  # Align to the left
 
-        open_material_btn = tk.Button(self.scrollable_frame, text="Open Material Layers", font="Arial 16", command=self.open_material_window)
+        open_material_btn = tk.Button(self.scrollable_frame, text="Open Real Data Window", font="Arial 16", command=self.open_material_window)
         open_material_btn.pack(pady=10, padx=10, anchor="w")  # Align to the left
 
-        self.material_status_label = tk.Label(self.scrollable_frame, text="Material Status: Not Submitted\n\n\n", font="Arial 14", fg="red", justify='left')
+        self.material_status_label = tk.Label(self.scrollable_frame, text="Real Data Status: Not Submitted\n\n\n", font="Arial 14", fg="red", justify='left')
         self.material_status_label.pack(pady=10, padx=10, anchor="w")  # Align to the left
 
         open_pwave_dis_btn = tk.Button(self.scrollable_frame, text="P-wave Displacement Animation", font="Arial 16", command=self.open_Pwave_displacement)
@@ -112,7 +112,7 @@ class MainApp(tk.Tk):
 
     def open_material_window(self):
         if self.has_submit_material: 
-            messagebox.showerror("Error", "Material parameter has been submitted")
+            messagebox.showerror("Error", "Real data parameter has been submitted")
             return
 
         if not self.has_submit_input:
@@ -122,7 +122,7 @@ class MainApp(tk.Tk):
         if self.material_window is None or not self.material_window.winfo_exists():
             self.material_window = MaterialWindow(self)
         else:
-            messagebox.showerror("Error", "Material Window is already open.")
+            messagebox.showerror("Error", "Real Data Window is already open.")
 
     def update_input_status(self):
         """Update the input submission status."""
@@ -315,7 +315,7 @@ class InputWindow(tk.Toplevel):
 class MaterialWindow(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
-        self.title("Material Window")
+        self.title("Real Data Window")
         self.geometry("800x600")
         self.dataframe = None  # To store the generated dataframe
 

@@ -115,8 +115,8 @@ class RealDataProcess():
         x_meters = geodesic((origin_lat, origin_lon), (origin_lat, epicenter[1])).meters
 
         # Convert to grid index
-        self.source_x = min(max(int(x_meters / DX), 0), self.NX - 1)
-        self.source_y = min(max(int(self.depth / DY), 0), self.NY - 1)
+        self.source_x = min(max(int(x_meters / DX), 0), self.NX - 20)
+        self.source_y = min(max(int(self.depth / DY), 0), self.NY - 20)
 
         depth_target = np.linspace(0, self.YMAX, self.NY)  # in meters
 

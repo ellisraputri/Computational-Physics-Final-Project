@@ -148,3 +148,8 @@ This project is a simple earthquake simulator app that shows the properties of P
 
 
 </details>
+
+
+## Demo Video
+
+To access the demo video, please refer to this [link](https://drive.google.com/file/d/18DiBJ7Imyb80yAAzuTf9Xjux5Lgltusj/view)

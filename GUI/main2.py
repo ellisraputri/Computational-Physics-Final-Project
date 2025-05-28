@@ -177,12 +177,6 @@ class MainApp(tk.Tk):
         window.run_wavelet_eq()
         window.create_figure_displacement()
 
-        seismic_moment = window.get_seismic_moment()
-        magnitude = window.get_moment_magnitude_scale()
-        energy = window.get_energy_released()
-        self.info_label.config(text=f"Seismic moment = {seismic_moment} \nMagnitude = {magnitude} \nEnergy Released= {energy}")
-        print(f"Seismic moment = {seismic_moment} \nMagnitude = {magnitude} \nEnergy Released= {energy}")
-
         video_window = VideoPlayer(self, "real_test_s_wave1.mp4")
 
     def open_Swave_pressure(self):

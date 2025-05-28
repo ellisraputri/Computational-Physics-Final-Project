@@ -118,9 +118,6 @@ This project is a simple earthquake simulator app that shows the properties of P
 
     <img src="images/gui2.png" alt ="GUI Window Image" width = "400"><br><br>
 
-- To view the seismic moment, magnitude, and energy released, you need to run the S-wave displacement animation first. 
-
-    <img src="images/magnitude1.png" alt ="Magnitude Result Image" width = "200">
 
 </details>
 
@@ -148,3 +145,8 @@ This project is a simple earthquake simulator app that shows the properties of P
 
 
 </details>
+
+
+## Demo Video
+
+To access the demo video, please refer to this [link](https://drive.google.com/file/d/18DiBJ7Imyb80yAAzuTf9Xjux5Lgltusj/view)

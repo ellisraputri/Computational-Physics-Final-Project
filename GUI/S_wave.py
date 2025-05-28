@@ -99,7 +99,7 @@ class SWave():
 
         self.img1 = ax1.imshow(self.ux.T, extent=[self.XMIN, self.XMAX, self.YMAX, self.YMIN], cmap='seismic', vmin=-1e-6, vmax=1e-6)
         plt.colorbar(self.img1, ax=ax1, label='Horizontal Displacement (m)')
-        ax1.set_title("Horizontal Displacement (SV-Wave)")
+        ax1.set_title("Horizontal Displacement (SH-Wave)")
         ax1.set_xlabel("Distance (m)")
         ax1.set_ylabel("Depth (m)")
 
